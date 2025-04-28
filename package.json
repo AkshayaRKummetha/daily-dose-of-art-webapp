@@ -2,7 +2,7 @@
   "name": "daily-dose-of-art",
   "version": "1.0.0",
   "description": "A web app that displays a daily artwork from The Metropolitan Museum of Art!",
-  "author": "Your Name",
+  "author": "Akshaya Kummetha",
   "license": "MIT",
   "private": true,
   "scripts": {
