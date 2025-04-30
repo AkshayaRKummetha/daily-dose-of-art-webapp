@@ -1,4 +1,5 @@
-import React { useEffect, useState, Suspense, lazy } from "react";
+import React from "react";
+import { useEffect, useState, Suspense, lazy } from "react";
 import Loader from "./components/Loader";
 import ErrorMessage from "./components/ErrorMessage";
 import FavoritesList from "./components/FavoritesList";
