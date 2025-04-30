@@ -210,3 +210,23 @@ button:focus,
 .exhibition-card a:hover {
   color: #003366;
 }
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.social-links img {
+  width: 32px;
+  height: 32px;
+  filter: grayscale(100%);
+  transition: filter 0.2s;
+}
+
+.social-links a:hover img,
+.social-links a:focus img {
+  filter: none;
+}
+
