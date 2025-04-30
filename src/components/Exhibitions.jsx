@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+// src/components/Exhibitions.jsx
+import React, { useEffect, useState } from "react";
+import Parser from "rss-parser";
 
 export default function Exhibitions() {
   const [exhibitions, setExhibitions] = useState([]);
@@ -6,24 +8,29 @@ export default function Exhibitions() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setLoading(true);
-    fetch("/exhibitions.json")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch exhibitions.");
-        return res.json();
-      })
-      .then((data) => {
-        setExhibitions(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Unable to load exhibitions at this time.");
-        setLoading(false);
-      });
+    async function fetchExhibitions() {
+      setLoading(true);
+      setError("");
+      try {
+        const parser = new Parser();
+        // Use a CORS proxy since the RSS feed is not CORS-enabled
+        const CORS_PROXY = "https://api.allorigins.win/get?url=";
+        const RSS_URL = encodeURIComponent("https://www.metmuseum.org/exhibitions.rss");
+        const response = await fetch(`${CORS_PROXY}${RSS_URL}`);
+        const data = await response.json();
+        const feed = await parser.parseString(data.contents);
+        setExhibitions(feed.items || []);
+      } catch (err) {
+        setError("Failed to load exhibitions.");
+      }
+      setLoading(false);
+    }
+    fetchExhibitions();
   }, []);
 
   if (loading) return <div className="loader">Loading exhibitions...</div>;
   if (error) return <div className="error-message">{error}</div>;
+  if (!exhibitions.length) return <div>No exhibitions found.</div>;
 
   return (
     <section className="exhibitions-section" id="exhibitions">
@@ -31,11 +38,17 @@ export default function Exhibitions() {
       <div className="exhibitions-list">
         {exhibitions.map((ex, i) => (
           <div className="exhibition-card" key={i}>
-            <img src={ex.image} alt={ex.title} />
+            {ex.enclosure && ex.enclosure.url ? (
+              <img src={ex.enclosure.url} alt={ex.title} />
+            ) : (
+              <img src="/default-exhibition.jpg" alt="Exhibition" />
+            )}
             <div>
               <h3>{ex.title}</h3>
-              <p className="exhibition-dates">{ex.dates}</p>
-              <p>{ex.description}</p>
+              <p className="exhibition-dates">
+                {ex.pubDate ? new Date(ex.pubDate).toLocaleDateString() : ""}
+              </p>
+              <p>{ex.contentSnippet || ex.content || ""}</p>
               <a href={ex.link} target="_blank" rel="noopener noreferrer">
                 Learn More
               </a>
