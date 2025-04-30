@@ -1,136 +1,60 @@
-import React, { useEffect, useState, Suspense, lazy } from "react";
-import Loader from "./components/Loader";
-import ErrorMessage from "./components/ErrorMessage";
-import FavoritesList from "./components/FavoritesList";
-import VisitorInfoModal from "./components/VisitorInfoModal";
-import Exhibitions from "./components/Exhibitions";
-import EventCalendar from "./components/EventCalendar";
-import SupportCTA from "./components/SupportCTA";
-import SocialLinks from "./components/SocialLinks";
-import NavBar from "./components/NavBar";
-import {
-  getDailyArt,
-  fetchArtById,
-  getFavorites,
-  saveFavorite,
-  removeFavorite,
-} from "./utils";
+import React, { useEffect, useState } from "react";
+import Parser from "rss-parser";
 
-const ArtDisplay = lazy(() => import("./components/ArtDisplay"));
-
-function App() {
-  const [art, setArt] = useState(null);
+export default function Exhibitions() {
+  const [exhibitions, setExhibitions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [favorites, setFavorites] = useState(getFavorites());
-  const [showFavorites, setShowFavorites] = useState(false);
-  const [showVisitorInfo, setShowVisitorInfo] = useState(false);
 
-  // Loading daily art from cache or fetch a new one
   useEffect(() => {
-    setLoading(true);
-    setError("");
-    getDailyArt()
-      .then((artData) => {
-        setArt(artData);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Failed to load artwork. Please try again.");
-        setLoading(false);
-      });
+    async function fetchExhibitions() {
+      setLoading(true);
+      setError("");
+      try {
+        const parser = new Parser();
+        // Use a CORS proxy since the RSS feed is not CORS-enabled
+        const CORS_PROXY = "https://api.allorigins.win/get?url=";
+        const RSS_URL = encodeURIComponent("https://www.metmuseum.org/exhibitions.rss");
+        const response = await fetch(`${CORS_PROXY}${RSS_URL}`);
+        const data = await response.json();
+        const feed = await parser.parseString(data.contents);
+        setExhibitions(feed.items || []);
+      } catch (err) {
+        setError("Failed to load exhibitions.");
+      }
+      setLoading(false);
+    }
+    fetchExhibitions();
   }, []);
 
-  // Handling manual refresh (fetch new random art and update daily cache)
-  const handleRefresh = () => {
-    setLoading(true);
-    setError("");
-    fetchArtById()
-      .then((artData) => {
-        setArt(artData);
-        setLoading(false);
-        const today = new Date().toISOString().slice(0, 10);
-        localStorage.setItem("dailyArt", JSON.stringify({ date: today, art: artData }));
-      })
-      .catch(() => {
-        setError("Failed to load new artwork. Please try again.");
-        setLoading(false);
-      });
-  };
-
-  // Handling adding/removing favorites
-  const handleFavorite = (artwork) => {
-    if (favorites.some((fav) => fav.objectID === artwork.objectID)) {
-      const updated = removeFavorite(artwork.objectID);
-      setFavorites(updated);
-    } else {
-      const updated = saveFavorite(artwork);
-      setFavorites(updated);
-    }
-  };
-
-  // Toggling favorites list
-  const toggleFavorites = () => setShowFavorites((prev) => !prev);
-
-  // Showing Visitor Info Modal
-  const handleShowVisitorInfo = () => setShowVisitorInfo(true);
-  const handleCloseVisitorInfo = () => setShowVisitorInfo(false);
+  if (loading) return <div className="loader">Loading exhibitions...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+  if (!exhibitions.length) return <div>No exhibitions found.</div>;
 
   return (
-    <div className="app-container">
-      {/* Navigation Bar */}
-      <NavBar onShowVisitorInfo={handleShowVisitorInfo} />
-
-      {/* Visitor Information Modal */}
-      <VisitorInfoModal open={showVisitorInfo} onClose={handleCloseVisitorInfo} />
-
-      {/* Main Heading */}
-      <h1 tabIndex={0}>Daily Dose of Art</h1>
-
-      {/* Main Controls */}
-      <div className="controls">
-        <button onClick={handleRefresh} aria-label="Show new artwork">New Artwork</button>
-        <button onClick={toggleFavorites} aria-label="Show favorites">
-          {showFavorites ? "Hide Favorites" : "Show Favorites"}
-        </button>
-        <button onClick={handleShowVisitorInfo} aria-label="Show visitor information">
-          Visitor Info
-        </button>
+    <section className="exhibitions-section" id="exhibitions">
+      <h2>Current Exhibitions</h2>
+      <div className="exhibitions-list">
+        {exhibitions.map((ex, i) => (
+          <div className="exhibition-card" key={i}>
+            {ex.enclosure && ex.enclosure.url ? (
+              <img src={ex.enclosure.url} alt={ex.title} />
+            ) : (
+              <img src="/default-exhibition.jpg" alt="Exhibition" />
+            )}
+            <div>
+              <h3>{ex.title}</h3>
+              <p className="exhibition-dates">
+                {ex.pubDate ? new Date(ex.pubDate).toLocaleDateString() : ""}
+              </p>
+              <p>{ex.contentSnippet || ex.content || ""}</p>
+              <a href={ex.link} target="_blank" rel="noopener noreferrer">
+                Learn More
+              </a>
+            </div>
+          </div>
+        ))}
       </div>
-
-      {/* Main Content */}
-      {loading && <Loader />}
-      {error && <ErrorMessage message={error} onRetry={handleRefresh} />}
-      {!loading && art && !showFavorites && (
-        <Suspense fallback={<Loader />}>
-          <ArtDisplay
-            art={art}
-            isFavorite={favorites.some((fav) => fav.objectID === art.objectID)}
-            onFavorite={handleFavorite}
-          />
-        </Suspense>
-      )}
-      {!loading && showFavorites && (
-        <FavoritesList
-          favorites={favorites}
-          onSelect={(artwork) => {
-            setArt(artwork);
-            setShowFavorites(false);
-          }}
-          onRemove={(objectID) => {
-            const updated = removeFavorite(objectID);
-            setFavorites(updated);
-          }}
-        />
-      )}
-
-      {/* Museum Website Features */}
-      <Exhibitions />
-      <EventCalendar />
-      <SupportCTA />
-      <SocialLinks />
-    </div>
+    </section>
   );
 }
-
-export default App;
