@@ -1,3 +1,4 @@
+import React from "react";
 import PropTypes from "prop-types";
 
 function FavoritesList({ favorites, onSelect, onRemove }) {
