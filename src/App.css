@@ -160,3 +160,53 @@ button:focus,
 .error-message {
   color: #c00;
 }
+
+.exhibitions-section {
+  margin: 2rem 0;
+  text-align: left;
+}
+
+.exhibitions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.exhibition-card {
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  max-width: 320px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.exhibition-card img {
+  width: 100%;
+  border-radius: 6px;
+  margin-bottom: 0.8rem;
+}
+
+.exhibition-card h3 {
+  margin: 0.5rem 0 0.2rem 0;
+  color: #003366;
+}
+
+.exhibition-dates {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.exhibition-card a {
+  color: #0055a5;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.exhibition-card a:hover {
+  color: #003366;
+}
