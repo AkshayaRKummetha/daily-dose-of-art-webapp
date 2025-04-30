@@ -4,7 +4,6 @@ import ErrorMessage from "./components/ErrorMessage";
 import FavoritesList from "./components/FavoritesList";
 import ArtDisplay from "./components/ArtDisplay";
 import VisitorInfoModal from "./components/VisitorInfoModal";
-import Exhibitions from "./components/Exhibitions";
 import { getDailyArt, fetchArtById, getFavorites, saveFavorite, removeFavorite } from "./utils";
 
 export default function App() {
@@ -93,8 +92,6 @@ export default function App() {
         />
       )}
 
-      {/* Exhibitions section */}
-      <Exhibitions />
     </div>
   );
 }
