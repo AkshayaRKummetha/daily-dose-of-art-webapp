@@ -124,10 +124,11 @@ p {
 }
 
 /* Button and controls styling - MET Red Theme */
-button, .favorite-btn, .controls button {
+button, .favorite-btn, .controls button,
+a.button, .met-link-btn {
   font-family: 'Montserrat', Arial, sans-serif;
   background-color: var(--met-red);
-  color: #fff;
+  color: #fff !important;
   border: none;
   border-radius: 3px;
   padding: 0.6rem 1.2rem;
@@ -137,6 +138,8 @@ button, .favorite-btn, .controls button {
   transition: background-color 0.3s ease;
   font-weight: 600;
   letter-spacing: 0.01em;
+  text-decoration: none;
+  display: inline-block;
 }
 
 button:hover,
@@ -144,9 +147,15 @@ button:focus,
 .favorite-btn:hover,
 .favorite-btn:focus,
 .controls button:hover,
-.controls button:focus {
+.controls button:focus,
+a.button:hover,
+a.button:focus,
+.met-link-btn:hover,
+.met-link-btn:focus {
   background-color: var(--met-red-dark);
+  color: #fff !important;
   outline: none;
+  text-decoration: none;
 }
 
 /* Favorite button specific */
