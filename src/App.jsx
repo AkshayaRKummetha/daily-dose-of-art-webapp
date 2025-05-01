@@ -67,17 +67,33 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <h1 tabIndex={0}>Daily Dose of Art</h1>
-      <div className="controls">
-        <button onClick={handleRefresh} aria-label="Show new artwork">New Artwork</button>
-        <button onClick={toggleFavorites} aria-label="Show favorites">
-          {showFavorites ? "Hide Favorites" : "Show Favorites"}
-        </button>
-        <button onClick={() => setShowVisitorInfo(true)}>
-          Visitor Info
-        </button>
-      </div>
-      <VisitorInfoModal open={showVisitorInfo} onClose={() => setShowVisitorInfo(false)} />
+      <h1>Daily Dose of Art</h1>
+      <button onClick={handleRefresh}>New Artwork</button>
+      <button onClick={toggleFavorites}>
+        {showFavorites ? "Hide Favorites" : "Show Favorites"}
+      </button>
       {loading && <Loader />}
-      {error && <ErrorMessage message={error} onRetry={handleRefresh} />}
-      {!loading &&
+      {error && <ErrorMessage message={error} />}
+      {!loading && art && !showFavorites && (
+        <ArtDisplay
+          art={art}
+          onFavorite={handleFavorite}
+          isFavorite={favorites.some((fav) => fav.objectID === art.objectID)}
+        />
+      )}
+      {showFavorites && (
+        <FavoritesList
+          favorites={favorites}
+          onSelect={(artwork) => setArt(artwork)}
+          onRemove={(objectID) => {
+            setFavorites(removeFavorite(objectID));
+          }}
+        />
+      )}
+      {/* If you use VisitorInfoModal */}
+      {showVisitorInfo && (
+        <VisitorInfoModal onClose={() => setShowVisitorInfo(false)} />
+      )}
+    </div>
+  );
+}
