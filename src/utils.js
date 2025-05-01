@@ -67,45 +67,39 @@ export function removeFavorite(objectID) {
   return updated;
 }
 
-// Replace getRecommendedArtworks with this improved version
+// Improved recommendations with preference weighting
 export function getRecommendedArtworks(allArtworks, favorites, preferences) {
   if (allArtworks.length === 0) return [];
-  
   // Exclude favorited artworks
-  const nonFavoriteArtworks = allArtworks.filter(art => 
+  const nonFavoriteArtworks = allArtworks.filter(art =>
     !favorites.some(fav => fav.objectID === art.objectID)
   );
 
   // Create scoring system
   return nonFavoriteArtworks.map(art => {
     let score = 0;
-    
     // Style matching (40% weight)
     if (preferences.styles?.length > 0 && art.style) {
       const artStyles = art.style.toLowerCase().split('|');
-      score += preferences.styles.filter(prefStyle => 
+      score += preferences.styles.filter(prefStyle =>
         artStyles.some(artStyle => artStyle.includes(prefStyle.toLowerCase()))
       ).length * 40;
     }
-
     // Medium matching (30% weight)
-    if (art.medium) {
+    if (preferences.mediums?.length > 0 && art.medium) {
       const artMediums = art.medium.toLowerCase().split(/,|;| and /);
-      score += preferences.periods?.filter(prefMedium => 
+      score += preferences.mediums.filter(prefMedium =>
         artMediums.some(artMedium => artMedium.includes(prefMedium.toLowerCase()))
       ).length * 30;
     }
-
-    // Date/period matching (20% weight)
+    // Period matching (20% weight)
     if (preferences.periods?.length > 0 && art.objectDate) {
-      score += preferences.periods.filter(prefPeriod => 
+      score += preferences.periods.filter(prefPeriod =>
         art.objectDate.toLowerCase().includes(prefPeriod.toLowerCase())
       ).length * 20;
     }
-
     // Random boost to ensure diversity (10% weight)
     score += Math.random() * 10;
-
     return { art, score };
   })
   .sort((a, b) => b.score - a.score)
