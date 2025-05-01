@@ -1,93 +1,103 @@
-export async function fetchArtById(preferences = {}) {
-  const params = new URLSearchParams({
-    hasImages: 'true',
-    q: 'public' // Base query to ensure some results
-  });
+// Fetching a new random artwork from The Met API
+export async function fetchArtById(preferences) {
+  const idsRes = await fetch(
+    "https://collectionapi.metmuseum.org/public/collection/v1/objects"
+  );
+  const idsData = await idsRes.json();
+  if (!idsData.objectIDs?.length) throw new Error("No artworks found.");
 
-  // Apply medium filter if specified
-  if (preferences.mediums?.length) {
-    params.set('medium', preferences.mediums.join('|'));
-  }
-
-  try {
-    // First try filtered search
-    const searchRes = await fetch(
-      `https://collectionapi.metmuseum.org/public/collection/v1/search?${params}`
+  // Trying up to 10 times to get an artwork with an image
+  for (let i = 0; i < 10; i++) {
+    const randomIndex = Math.floor(Math.random() * idsData.objectIDs.length);
+    const randomId = idsData.objectIDs[randomIndex];
+    const artRes = await fetch(
+      `https://collectionapi.metmuseum.org/public/collection/v1/objects/${randomId}`
     );
-    const { objectIDs = [] } = await searchRes.json();
-
-    // Get details for up to 20 random results
-    const sampleIDs = objectIDs.length > 0 
-      ? getRandomSample(objectIDs, 20)
-      : await fetchArtIDsFallback();
-
-    // Check artworks against client-side filters
-    for (const id of sampleIDs) {
-      const art = await fetchArtDetails(id);
-      if (art && matchesClientFilters(art, preferences)) {
-        return art;
-      }
-    }
+    const art = await artRes.json();
     
-    // Fallback to non-filtered search
-    return fetchArtById({});
-  } catch (error) {
-    console.error('Filter error:', error.message);
-    return fetchArtById({});
+    // Returning art only if it has a primary or additional image
+    if (art.primaryImage || (art.additionalImages && art.additionalImages.length > 0)) {
+      return art;
+    }
   }
+  throw new Error("Could not find artwork with images after several tries.");
 }
 
-// Client-side filter matching (OR logic for medium/style)
-function matchesClientFilters(art, preferences) {
-  const { styles = [], mediums = [] } = preferences;
-  
-  // No filters = match all
-  if (styles.length === 0 && mediums.length === 0) return true;
-
-  // Check style matches (any)
-  const styleMatch = styles.length > 0 &&
-    styles.some(s => art.style?.toLowerCase().includes(s.toLowerCase()));
-
-  // Check medium matches (any)
-  const mediumMatch = mediums.length > 0 &&
-    mediums.some(m => art.medium?.toLowerCase().includes(m.toLowerCase()));
-
-  // OR combination
-  return styleMatch || mediumMatch;
+// Getting today's artwork from localStorage or fetching a new one
+export async function getDailyArt() {
+  const today = new Date().toISOString().slice(0, 10);
+  const cached = localStorage.getItem("dailyArt");
+  if (cached) {
+    const { date, art } = JSON.parse(cached);
+    if (date === today && (art.primaryImage || art.additionalImages?.length)) {
+      return art;
+    }
+  }
+  const art = await fetchArtById();
+  localStorage.setItem("dailyArt", JSON.stringify({ date: today, art }));
+  return art;
 }
 
-// Update recommendation scoring
+// Managing favorites list
+export function getFavorites() {
+  const favs = localStorage.getItem("favorites");
+  return favs ? JSON.parse(favs) : [];
+}
+
+// Saving a favorite artwork
+export function saveFavorite(art) {
+  const favs = getFavorites();
+  if (!favs.some((fav) => fav.objectID === art.objectID)) {
+    const updated = [...favs, art];
+    localStorage.setItem("favorites", JSON.stringify(updated));
+    return updated;
+  }
+  return favs;
+}
+
+// Removing a favorite artwork by objectID
+export function removeFavorite(objectID) {
+  const favs = getFavorites();
+  const updated = favs.filter((fav) => fav.objectID !== objectID);
+  localStorage.setItem("favorites", JSON.stringify(updated));
+  return updated;
+}
+
+// Recommendation system
 export function getRecommendedArtworks(allArtworks, favorites, preferences) {
-  return allArtworks
-    .filter(art => !favorites.some(fav => fav.objectID === art.objectID))
-    .map(art => ({
-      art,
-      score: calculatePreferenceScore(art, preferences)
-    }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 12)
-    .map(({ art }) => art);
-}
+  if (allArtworks.length === 0) return [];
+  
+  const nonFavoriteArtworks = allArtworks.filter(art => 
+    !favorites.some(fav => fav.objectID === art.objectID)
+  );
 
-function calculatePreferenceScore(art, preferences) {
-  let score = 0;
-  const { styles = [], mediums = [] } = preferences;
+  return nonFavoriteArtworks.map(art => {
+    let score = 0;
+    
+    if (preferences.styles?.length > 0 && art.style) {
+      const artStyles = art.style.toLowerCase().split('|');
+      score += preferences.styles.filter(prefStyle => 
+        artStyles.some(artStyle => artStyle.includes(prefStyle.toLowerCase()))
+      ).length * 40;
+    }
 
-  // Style matching (40%)
-  if (styles.length && art.style) {
-    const artStyles = art.style.toLowerCase().split('|');
-    score += styles.filter(s => 
-      artStyles.some(as => as.includes(s.toLowerCase()))
-    ).length * 40;
-  }
+    if (art.medium) {
+      const artMediums = art.medium.toLowerCase().split(/,|;| and /);
+      score += preferences.periods?.filter(prefMedium => 
+        artMediums.some(artMedium => artMedium.includes(prefMedium.toLowerCase()))
+      ).length * 30;
+    }
 
-  // Medium matching (40%)
-  if (mediums.length && art.medium) {
-    const artMediums = art.medium.toLowerCase().split(/,\s*|;\s*|\band\b/);
-    score += mediums.filter(m => 
-      artMediums.some(am => am.includes(m.toLowerCase()))
-    ).length * 40;
-  }
+    if (preferences.periods?.length > 0 && art.objectDate) {
+      score += preferences.periods.filter(prefPeriod => 
+        art.objectDate.toLowerCase().includes(prefPeriod.toLowerCase())
+      ).length * 20;
+    }
 
-  return score + Math.random() * 20; // Add randomness for diversity
+    score += Math.random() * 10;
+    return { art, score };
+  })
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 12)
+  .map(item => item.art);
 }
