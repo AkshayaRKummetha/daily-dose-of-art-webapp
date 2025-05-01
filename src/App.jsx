@@ -131,30 +131,21 @@ export default function App() {
       {showPreferences && (
         <Preferences preferences={preferences} setPreferences={handleSetPreferences} />
       )}
+      
       {/* Rendering ArtDisplay if not loading, not showing favorites or preferences, and art exists */}
-      {!loading && art && !showFavorites && !showPreferences && (
-        <ArtDisplay
-          art={art}
-          onFavorite={handleFavorite}
-          isFavorite={favorites.some((fav) => fav.objectID === art.objectID)}
-        />
-      )}
-      {/* Rendering Recommendations if not loading, not showing favorites or preferences, and recommendations exist */}
-      {!loading && !showFavorites && !showPreferences && recommended.length > 0 && (
-        <div>
-          <h2>Recommended for You</h2>
-          <div className="recommended-list">
-            {recommended.slice(0, 4).map((recArt) => (
-              <ArtDisplay
-                key={recArt.objectID}
-                art={recArt}
-                onFavorite={handleFavorite}
-                isFavorite={favorites.some((fav) => fav.objectID === recArt.objectID)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+    {!loading && art && !showFavorites && !showPreferences && (
+  <div className="main-art-container">
+    <ArtDisplay
+      art={art}
+      onFavorite={handleFavorite}
+      isFavorite={favorites.some((fav) => fav.objectID === art.objectID)}
+    />
+    <div className="action-buttons">
+      <button onClick={handleRefresh}>Show Me Another Artwork</button>
+    </div>
+  </div>
+)}
+  
       {/* Rendering FavoritesList if toggled */}
       {showFavorites && (
         <FavoritesList
