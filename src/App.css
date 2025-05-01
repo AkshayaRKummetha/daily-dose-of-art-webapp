@@ -167,3 +167,21 @@ button:focus,
 /* Loader and error message */
 .loader, .error-message {
   font-size: 1.2rem;
+}
+
+/* Main art container */
+.main-art-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+.action-buttons {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
