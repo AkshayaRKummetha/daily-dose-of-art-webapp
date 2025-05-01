@@ -26,24 +26,27 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
         <p>No image available.</p>
       )}
       <br />
-      {art.objectURL && (
-        <a
-          href={art.objectURL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="art-link"
+      {/* Button group for better layout */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "1.5rem" }}>
+        <button
+          className="favorite-btn"
+          aria-pressed={isFavorite}
+          onClick={() => onFavorite(art)}
+          style={{ marginBottom: "1rem" }}
         >
-          Learn more at The Met
-        </a>
-      )}
-      <br />
-      <button
-        className="favorite-btn"
-        aria-pressed={isFavorite}
-        onClick={() => onFavorite(art)}
-      >
-        {isFavorite ? "★ Remove from Favorites" : "☆ Add to Favorites"}
-      </button>
+          {isFavorite ? "★ Remove from Favorites" : "☆ Add to Favorites"}
+        </button>
+        {art.objectURL && (
+          <a
+            href={art.objectURL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="art-link"
+          >
+            Learn more at The Met
+          </a>
+        )}
+      </div>
     </div>
   );
 }
@@ -55,4 +58,3 @@ ArtDisplay.propTypes = {
 };
 
 export default ArtDisplay;
-
