@@ -1,0 +1,60 @@
+.artwork-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 2rem;
+  justify-items: center;
+  margin: 2rem auto 1rem auto;
+  max-width: 900px;
+}
+
+.artwork-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 1.2rem 0.7rem 1rem 0.7rem;
+  position: relative;
+  width: 160px;
+}
+
+.artwork-thumb {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 0.7rem;
+}
+
+.artwork-title {
+  font-family: Georgia, serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #003366;
+  text-align: center;
+  margin-bottom: 0.4rem;
+  min-height: 2.5em;
+  max-width: 130px;
+  overflow-wrap: break-word;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  cursor: pointer;
+  color: #ffd700;
+  margin-top: 0.2rem;
+  transition: color 0.2s;
+  outline: none;
+}
+
+.star-btn[aria-pressed="false"] {
+  color: #bbb;
+}
+.star-btn:hover,
+.star-btn:focus {
+  color: #ffb100;
+}
