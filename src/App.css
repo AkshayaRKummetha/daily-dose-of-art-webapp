@@ -96,6 +96,19 @@ button:focus,
   color: #ffd700; /* gold accent for favorites */
 }
 
+/* --- Button Group for ArtDisplay --- */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.button-group .favorite-btn {
+  margin-bottom: 1rem;
+  margin-top: 0; /* Remove top margin if present */
+}
+
 /* Layout for controls */
 .controls {
   margin-bottom: 2rem;
@@ -154,30 +167,3 @@ button:focus,
 /* Loader and error message */
 .loader, .error-message {
   font-size: 1.2rem;
-  color: #0055a5;
-  margin-top: 2rem;
-}
-
-.error-message {
-  color: #c00;
-}
-
-.social-links {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin: 2rem 0;
-}
-
-.social-links img {
-  width: 32px;
-  height: 32px;
-  filter: grayscale(100%);
-  transition: filter 0.2s;
-}
-
-.social-links a:hover img,
-.social-links a:focus img {
-  filter: none;
-}
-
