@@ -1,8 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 
 function ArtDisplay({ art, isFavorite, onFavorite }) {
   if (!art) return null;
+
+  // Collect all available images (primary + additional)
+  const images = [art.primaryImage, ...(art.additionalImages || [])].filter(Boolean);
+  const [imgIndex, setImgIndex] = useState(0);
+
+  const handlePrev = () => setImgIndex((i) => (i > 0 ? i - 1 : images.length - 1));
+  const handleNext = () => setImgIndex((i) => (i < images.length - 1 ? i + 1 : 0));
 
   return (
     <div>
@@ -16,18 +23,28 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
       <p>
         <strong>Medium:</strong> {art.medium || "Unknown"}
       </p>
-      {art.primaryImage ? (
-        <img
-          src={art.primaryImage}
-          alt={art.title}
-          style={{ maxWidth: "80%", borderRadius: "8px", marginTop: "1rem" }}
-        />
+      {images.length > 0 ? (
+        <div>
+          <img
+            src={images[imgIndex]}
+            alt={art.title}
+            style={{ maxWidth: "80%", borderRadius: "8px", marginTop: "1rem" }}
+          />
+          {images.length > 1 && (
+            <div className="carousel-controls" style={{ marginTop: "0.5rem" }}>
+              <button onClick={handlePrev} aria-label="Previous image">Prev</button>
+              <span style={{ margin: "0 1rem" }}>
+                {imgIndex + 1} / {images.length}
+              </span>
+              <button onClick={handleNext} aria-label="Next image">Next</button>
+            </div>
+          )}
+        </div>
       ) : (
         <p>No image available.</p>
       )}
       <br />
-      {/* Button group for better layout */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "1.5rem" }}>
+      <div className="button-group" style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "1.5rem" }}>
         <button
           className="favorite-btn"
           aria-pressed={isFavorite}
