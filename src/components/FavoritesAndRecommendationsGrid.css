@@ -5,6 +5,8 @@
   justify-items: center;
   margin: 2rem auto 1rem auto;
   max-width: 900px;
+  /* Center the grid within the container */
+  justify-content: center;
 }
 
 .artwork-card {
@@ -28,9 +30,10 @@
   margin-bottom: 0.7rem;
 }
 
+/* Artwork title style: Merriweather, bold, deep blue, centered, 1.05rem */
 .artwork-title {
-  font-family: Georgia, serif;
-  font-weight: 600;
+  font-family: 'Merriweather', Georgia, serif;
+  font-weight: 700;
   font-size: 1.05rem;
   color: #003366;
   text-align: center;
@@ -38,6 +41,8 @@
   min-height: 2.5em;
   max-width: 130px;
   overflow-wrap: break-word;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
 }
 
 .star-btn {
