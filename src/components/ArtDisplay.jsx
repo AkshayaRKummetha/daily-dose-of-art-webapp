@@ -3,33 +3,32 @@ import PropTypes from "prop-types";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 function ArtDisplay({ art, isFavorite, onFavorite }) {
-  // Returning null if no art is provided
   if (!art) return null;
 
-  // Combining primary and additional images
+  // Combining all images
   const images = [art.primaryImage, ...(art.additionalImages || [])].filter(Boolean);
   const [imgIndex, setImgIndex] = useState(0);
 
-  // Creating a ref for TransformWrapper
+  // Ref for TransformWrapper
   const transformRef = useRef(null);
 
-  // Centering the image on initial render and when image changes
+  // Centering view on image change or new artwork
   useEffect(() => {
     if (transformRef.current && transformRef.current.centerView) {
+      // Slight delay to ensure DOM is ready
       setTimeout(() => {
         transformRef.current.centerView();
       }, 50);
     }
   }, [imgIndex, art.objectID]);
 
-  // Handling previous image in carousel
+  // Carousel controls
   const handlePrev = () =>
     setImgIndex((i) => (i > 0 ? i - 1 : images.length - 1));
-  // Handling next image in carousel
   const handleNext = () =>
     setImgIndex((i) => (i < images.length - 1 ? i + 1 : 0));
 
-  // Handling reset to center and default zoom
+  // Resetting zoom and centering image
   const handleReset = () => {
     if (transformRef.current) {
       transformRef.current.resetTransform();
@@ -53,7 +52,6 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
       </p>
       {images.length > 0 ? (
         <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          {/* Wrapping image in zoom & pan component, centering on init */}
           <TransformWrapper
             ref={transformRef}
             centerOnInit
@@ -65,7 +63,12 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
           >
             {({ zoomIn, zoomOut }) => (
               <>
-                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%" }}>
+                <div style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100%"
+                }}>
                   <TransformComponent
                     wrapperStyle={{
                       display: "flex",
@@ -95,7 +98,6 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
                     />
                   </TransformComponent>
                 </div>
-                {/* Rendering zoom controls */}
                 <div style={{ marginTop: "0.5rem" }}>
                   <button onClick={zoomIn} aria-label="Zoom in">Zoom In</button>
                   <button onClick={zoomOut} aria-label="Zoom out">Zoom Out</button>
@@ -104,7 +106,6 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
               </>
             )}
           </TransformWrapper>
-          {/* Rendering carousel controls if more than one image */}
           {images.length > 1 && (
             <div className="carousel-controls" style={{ marginTop: "0.5rem" }}>
               <button onClick={handlePrev} aria-label="Previous image">Prev</button>
@@ -119,7 +120,6 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
         <p>No image available.</p>
       )}
       <br />
-      {/* Rendering action buttons */}
       <div
         className="button-group"
         style={{
