@@ -107,3 +107,4 @@ export function getRecommendedArtworks(allArtworks, favorites, preferences) {
     )
   );
 }
+
