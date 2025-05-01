@@ -247,9 +247,10 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
             href={art.objectURL}
             target="_blank"
             rel="noopener noreferrer"
-            className="art-link"
+            className="button met-link-btn"
+            style={{ display: "inline-block", textDecoration: "none" }}
           >
-            Learn more at The Met
+            Learn More at The MET
           </a>
         )}
       </div>
