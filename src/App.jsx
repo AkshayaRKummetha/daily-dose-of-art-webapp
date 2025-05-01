@@ -5,16 +5,16 @@ import FavoritesList from "./components/FavoritesList";
 import ArtDisplay from "./components/ArtDisplay";
 import VisitorInfoModal from "./components/VisitorInfoModal";
 import Preferences from "./components/Preferences";
-import { 
-  getDailyArt, 
-  fetchArtById, 
-  getFavorites, 
-  saveFavorite, 
-  removeFavorite, 
-  getRecommendedArtworks // Importing recommendation utility
+import {
+  getDailyArt,
+  fetchArtById,
+  getFavorites,
+  saveFavorite,
+  removeFavorite,
+  getRecommendedArtworks
 } from "./utils";
 
-// Initializing default preferences
+// Setting default preferences
 const DEFAULT_PREFERENCES = { styles: [], periods: [] };
 
 export default function App() {
@@ -29,7 +29,7 @@ export default function App() {
   const [preferences, setPreferences] = useState(
     JSON.parse(localStorage.getItem("artPreferences")) || DEFAULT_PREFERENCES
   );
-  const [allArtworks, setAllArtworks] = useState([]); // Storing fetched artworks for recommendations
+  const [allArtworks, setAllArtworks] = useState([]);
 
   // Fetching daily art on mount
   useEffect(() => {
@@ -66,7 +66,6 @@ export default function App() {
       .then((artData) => {
         if (artData.primaryImage || (artData.additionalImages && artData.additionalImages.length > 0)) {
           setArt(artData);
-          // Adding new art to allArtworks for recommendations
           setAllArtworks((prev) => {
             if (artData && !prev.some(a => a.objectID === artData.objectID)) {
               return [...prev, artData];
