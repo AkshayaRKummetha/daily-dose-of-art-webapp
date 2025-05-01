@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "./Preferences.css";
 
 // Initial filter options
 const INITIAL_STYLES = ["Impressionism", "Modern", "Renaissance", "Abstract"];
