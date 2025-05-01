@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
@@ -10,6 +10,18 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
   const images = [art.primaryImage, ...(art.additionalImages || [])].filter(Boolean);
   const [imgIndex, setImgIndex] = useState(0);
 
+  // Creating a ref for TransformWrapper
+  const transformRef = useRef(null);
+
+  // Centering the image on initial render and when image changes
+  useEffect(() => {
+    if (transformRef.current && transformRef.current.centerView) {
+      setTimeout(() => {
+        transformRef.current.centerView();
+      }, 50);
+    }
+  }, [imgIndex, art.objectID]);
+
   // Handling previous image in carousel
   const handlePrev = () =>
     setImgIndex((i) => (i > 0 ? i - 1 : images.length - 1));
@@ -17,8 +29,18 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
   const handleNext = () =>
     setImgIndex((i) => (i < images.length - 1 ? i + 1 : 0));
 
+  // Handling reset to center and default zoom
+  const handleReset = () => {
+    if (transformRef.current) {
+      transformRef.current.resetTransform();
+      setTimeout(() => {
+        transformRef.current.centerView();
+      }, 201); // Ensuring centerView runs after resetTransform animation
+    }
+  };
+
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
       <h2 tabIndex={0}>{art.title}</h2>
       <p>
         <strong>Artist:</strong> {art.artistDisplayName || "Unknown"}
@@ -30,29 +52,54 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
         <strong>Medium:</strong> {art.medium || "Unknown"}
       </p>
       {images.length > 0 ? (
-        <div>
-          {/* Wrapping image in zoom & pan component */}
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          {/* Wrapping image in zoom & pan component, centering on init */}
           <TransformWrapper
+            ref={transformRef}
+            centerOnInit
             initialScale={1}
             minScale={0.8}
             maxScale={5}
             doubleClick={{ disabled: false }}
             wheel={{ step: 0.2 }}
           >
-            {({ zoomIn, zoomOut, resetTransform }) => (
+            {({ zoomIn, zoomOut }) => (
               <>
-                <TransformComponent>
-                  <img
-                    src={images[imgIndex]}
-                    alt={art.title}
-                    style={{ maxWidth: "80%", borderRadius: "8px", marginTop: "1rem" }}
-                  />
-                </TransformComponent>
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%" }}>
+                  <TransformComponent
+                    wrapperStyle={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                    contentStyle={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <img
+                      src={images[imgIndex]}
+                      alt={art.title}
+                      style={{
+                        maxWidth: "80vw",
+                        maxHeight: "60vh",
+                        borderRadius: "8px",
+                        marginTop: "1rem",
+                        display: "block",
+                        marginLeft: "auto",
+                        marginRight: "auto"
+                      }}
+                    />
+                  </TransformComponent>
+                </div>
                 {/* Rendering zoom controls */}
                 <div style={{ marginTop: "0.5rem" }}>
                   <button onClick={zoomIn} aria-label="Zoom in">Zoom In</button>
                   <button onClick={zoomOut} aria-label="Zoom out">Zoom Out</button>
-                  <button onClick={resetTransform} aria-label="Reset zoom">Reset</button>
+                  <button onClick={handleReset} aria-label="Reset zoom and center">Reset</button>
                 </div>
               </>
             )}
