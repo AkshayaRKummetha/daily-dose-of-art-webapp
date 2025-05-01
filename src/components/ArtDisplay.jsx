@@ -2,65 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
-// SVGs for arrows
-const ArrowLeft = ({ ...props }) => (
-  <button
-    aria-label="Previous image"
-    {...props}
-    style={{
-      ...props.style,
-      background: "rgba(0,0,0,0.35)",
-      border: "none",
-      borderRadius: "50%",
-      width: 38,
-      height: 38,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      position: "absolute",
-      top: "50%",
-      left: 10,
-      transform: "translateY(-50%)",
-      cursor: "pointer",
-      zIndex: 2,
-      color: "#fff",
-      fontSize: "1.8rem",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.16)",
-    }}
-  >
-    <span aria-hidden="true" style={{ fontSize: "1.5em" }}>‹</span>
-  </button>
-);
-
-const ArrowRight = ({ ...props }) => (
-  <button
-    aria-label="Next image"
-    {...props}
-    style={{
-      ...props.style,
-      background: "rgba(0,0,0,0.35)",
-      border: "none",
-      borderRadius: "50%",
-      width: 38,
-      height: 38,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      position: "absolute",
-      top: "50%",
-      right: 10,
-      transform: "translateY(-50%)",
-      cursor: "pointer",
-      zIndex: 2,
-      color: "#fff",
-      fontSize: "1.8rem",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.16)",
-    }}
-  >
-    <span aria-hidden="true" style={{ fontSize: "1.5em" }}>›</span>
-  </button>
-);
-
 function ArtDisplay({ art, isFavorite, onFavorite }) {
   if (!art) return null;
 
@@ -151,7 +92,33 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
                 }}
               >
                 {images.length > 1 && (
-                  <ArrowLeft onClick={handlePrev} tabIndex={0} />
+                  <button
+                    aria-label="Previous image"
+                    onClick={handlePrev}
+                    style={{
+                      position: "absolute",
+                      left: 8,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "rgba(0,0,0,0.18)",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: 32,
+                      height: 32,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#fff",
+                      fontSize: "1.15rem",
+                      zIndex: 2,
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.10)",
+                      padding: 0,
+                      cursor: "pointer",
+                      opacity: 0.85,
+                    }}
+                  >
+                    <span aria-hidden="true" style={{ fontSize: "1.4em", lineHeight: 1 }}>‹</span>
+                  </button>
                 )}
                 <TransformComponent
                   wrapperStyle={{
@@ -179,11 +146,38 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
                       marginLeft: "auto",
                       marginRight: "auto",
                       boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+                      transition: "box-shadow 0.2s",
                     }}
                   />
                 </TransformComponent>
                 {images.length > 1 && (
-                  <ArrowRight onClick={handleNext} tabIndex={0} />
+                  <button
+                    aria-label="Next image"
+                    onClick={handleNext}
+                    style={{
+                      position: "absolute",
+                      right: 8,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "rgba(0,0,0,0.18)",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: 32,
+                      height: 32,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#fff",
+                      fontSize: "1.15rem",
+                      zIndex: 2,
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.10)",
+                      padding: 0,
+                      cursor: "pointer",
+                      opacity: 0.85,
+                    }}
+                  >
+                    <span aria-hidden="true" style={{ fontSize: "1.4em", lineHeight: 1 }}>›</span>
+                  </button>
                 )}
                 {/* Dots */}
                 {images.length > 1 && (
@@ -191,10 +185,10 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
                     style={{
                       position: "absolute",
                       left: "50%",
-                      bottom: "10px",
+                      bottom: 8,
                       transform: "translateX(-50%)",
                       display: "flex",
-                      gap: "0.5rem",
+                      gap: "0.32rem",
                       zIndex: 3,
                     }}
                   >
@@ -204,15 +198,16 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
                         aria-label={`Show image ${idx + 1}`}
                         onClick={() => handleDot(idx)}
                         style={{
-                          width: 12,
-                          height: 12,
+                          width: 8,
+                          height: 8,
                           borderRadius: "50%",
                           border: "none",
-                          background: idx === imgIndex ? "#0055a5" : "#ccc",
-                          opacity: idx === imgIndex ? 1 : 0.5,
+                          background: idx === imgIndex ? "#0055a5" : "#ddd",
+                          opacity: idx === imgIndex ? 1 : 0.6,
                           cursor: "pointer",
-                          boxShadow: idx === imgIndex ? "0 0 0 2px #fff" : "none",
+                          boxShadow: idx === imgIndex ? "0 0 0 1.5px #fff" : "none",
                           transition: "background 0.2s, opacity 0.2s",
+                          padding: 0,
                         }}
                         tabIndex={0}
                       />
