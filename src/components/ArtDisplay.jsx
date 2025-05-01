@@ -5,17 +5,16 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 function ArtDisplay({ art, isFavorite, onFavorite }) {
   if (!art) return null;
 
-  // Combining all images
+  // Combine all available images
   const images = [art.primaryImage, ...(art.additionalImages || [])].filter(Boolean);
   const [imgIndex, setImgIndex] = useState(0);
 
   // Ref for TransformWrapper
   const transformRef = useRef(null);
 
-  // Centering view on image change or new artwork
+  // Center view on image change or new artwork
   useEffect(() => {
     if (transformRef.current && transformRef.current.centerView) {
-      // Slight delay to ensure DOM is ready
       setTimeout(() => {
         transformRef.current.centerView();
       }, 50);
@@ -34,7 +33,7 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
       transformRef.current.resetTransform();
       setTimeout(() => {
         transformRef.current.centerView();
-      }, 201); // Ensuring centerView runs after resetTransform animation
+      }, 201); // Ensures centerView runs after resetTransform animation
     }
   };
 
@@ -56,12 +55,12 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
             ref={transformRef}
             centerOnInit
             initialScale={1}
-            minScale={0.8}
+            minScale={0.5}
             maxScale={5}
             doubleClick={{ disabled: false }}
             wheel={{ step: 0.2 }}
           >
-            {({ zoomIn, zoomOut }) => (
+            {({ zoomIn, zoomOut, resetTransform }) => (
               <>
                 <div style={{
                   display: "flex",
@@ -98,7 +97,7 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
                     />
                   </TransformComponent>
                 </div>
-                <div style={{ marginTop: "0.5rem" }}>
+                <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem", justifyContent: "center" }}>
                   <button onClick={zoomIn} aria-label="Zoom in">Zoom In</button>
                   <button onClick={zoomOut} aria-label="Zoom out">Zoom Out</button>
                   <button onClick={handleReset} aria-label="Reset zoom and center">Reset</button>
