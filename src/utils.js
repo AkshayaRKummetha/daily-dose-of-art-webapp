@@ -66,3 +66,44 @@ export function removeFavorite(objectID) {
   localStorage.setItem("favorites", JSON.stringify(updated));
   return updated;
 }
+
+// Getting recommended artworks based on favorites and preferences
+export function getRecommendedArtworks(allArtworks, favorites, preferences) {
+  // Returning empty array if no favorites and no preferences
+  if (
+    (!favorites || favorites.length === 0) &&
+    (!preferences ||
+      ((!preferences.styles || preferences.styles.length === 0) &&
+        (!preferences.periods || preferences.periods.length === 0)))
+  ) {
+    return [];
+  }
+
+  // Filtering artworks by matching style, period, or artist
+  return allArtworks.filter((art) =>
+    (
+      (preferences.styles &&
+        preferences.styles.length > 0 &&
+        preferences.styles.some((style) =>
+          (art.style || "")
+            .toLowerCase()
+            .includes(style.toLowerCase())
+        )) ||
+      (preferences.periods &&
+        preferences.periods.length > 0 &&
+        preferences.periods.some((period) =>
+          (art.objectDate || "")
+            .toLowerCase()
+            .includes(period.toLowerCase())
+        )) ||
+      (favorites &&
+        favorites.length > 0 &&
+        favorites.some(
+          (fav) =>
+            fav.artistDisplayName &&
+            art.artistDisplayName &&
+            fav.artistDisplayName === art.artistDisplayName
+        ))
+    )
+  );
+}
