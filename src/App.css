@@ -1,3 +1,10 @@
+/* MET Museum Color Scheme */
+:root {
+  --met-red: #ec012a; /* Official MET red */
+  --met-red-dark: hsl(350, 99%, 40%);
+  --met-red-darker: hsl(350, 99%, 30%);
+}
+
 /* Base font for body and paragraphs */
 body {
   margin: 0;
@@ -15,25 +22,33 @@ body {
   text-align: center;
 }
 
-/* Main Title */
+/* Main Title - Using Didot (MET-style serif) */
 h1 {
-  font-family: 'Borel', cursive;
-  font-weight: 700;
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  color: #003366;
-  letter-spacing: 0.04em;
+  font-family: 'GFS Didot', 'Bodoni MT', Georgia, serif;
+  font-weight: 400;
+  font-size: 2.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--met-red);
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Section Headings */
-h2, h3 {
-  font-family: 'Montserrat', Arial, sans-serif;
-  font-weight: 700;
-  font-size: 1.5rem;
-  margin-top: 2rem;
-  margin-bottom: 0.5rem;
-  color: #0055a5;
+/* Section Headings - Progressive Red Shades */
+h2 {
+  font-family: 'GFS Didot', 'Bodoni MT', Georgia, serif;
+  font-weight: 600;
+  font-size: 1.8rem;
+  margin: 2rem 0 1rem;
+  color: var(--met-red-dark);
   letter-spacing: 0.01em;
+}
+
+h3 {
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-weight: 600;
+  font-size: 1.4rem;
+  margin: 1.5rem 0 0.8rem;
+  color: var(--met-red-darker);
 }
 
 /* Paragraphs */
@@ -46,16 +61,15 @@ p {
 
 /* Artwork titles in grid cards */
 .artwork-title {
-  font-family: 'Borel', cursive;
-  font-weight: 700;
-  font-size: 1.12rem;
-  color: #003366;
+  font-family: 'GFS Didot', 'Bodoni MT', Georgia, serif;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--met-red-darker);
   text-align: center;
   margin-bottom: 0.4rem;
   min-height: 2.5em;
   max-width: 130px;
   overflow-wrap: break-word;
-  letter-spacing: 0.01em;
   line-height: 1.3;
 }
 
@@ -109,10 +123,10 @@ p {
   color: #ffb100;
 }
 
-/* Button and controls styling */
+/* Button and controls styling - MET Red Theme */
 button, .favorite-btn, .controls button {
   font-family: 'Montserrat', Arial, sans-serif;
-  background-color: #0055a5;
+  background-color: var(--met-red);
   color: #fff;
   border: none;
   border-radius: 3px;
@@ -131,14 +145,14 @@ button:focus,
 .favorite-btn:focus,
 .controls button:hover,
 .controls button:focus {
-  background-color: #003366;
+  background-color: var(--met-red-dark);
   outline: none;
 }
 
 /* Favorite button specific */
 .favorite-btn[aria-pressed="true"] {
-  background-color: #003366;
-  color: #ffd700; /* gold accent for favorites */
+  background-color: var(--met-red-dark);
+  color: #ffd700;
 }
 
 /* --- Button Group for ArtDisplay --- */
@@ -147,21 +161,6 @@ button:focus,
   flex-direction: column;
   align-items: center;
   margin-top: 1.5rem;
-}
-
-.button-group .favorite-btn {
-  margin-bottom: 1rem;
-  margin-top: 0; /* Remove top margin if present */
-}
-
-/* Layout for controls */
-.controls {
-  margin-bottom: 2rem;
-}
-
-/* Loader and error message */
-.loader, .error-message {
-  font-size: 1.2rem;
 }
 
 /* Main art container */
@@ -179,9 +178,4 @@ button:focus,
   display: flex;
   justify-content: center;
   gap: 1rem;
-}
-
-/* Remove legacy list styles */
-.favorites-list, .favorites-list li {
-  all: unset;
 }
