@@ -19,7 +19,12 @@ export default function App() {
     setError("");
     getDailyArt()
       .then((artData) => {
-        setArt(artData);
+        // Only set art if it has at least one image
+        if (artData.primaryImage || (artData.additionalImages && artData.additionalImages.length > 0)) {
+          setArt(artData);
+        } else {
+          setError("No image found for today's artwork. Try refreshing.");
+        }
         setLoading(false);
       })
       .catch(() => {
@@ -33,10 +38,14 @@ export default function App() {
     setError("");
     fetchArtById()
       .then((artData) => {
-        setArt(artData);
+        if (artData.primaryImage || (artData.additionalImages && artData.additionalImages.length > 0)) {
+          setArt(artData);
+          const today = new Date().toISOString().slice(0, 10);
+          localStorage.setItem("dailyArt", JSON.stringify({ date: today, art: artData }));
+        } else {
+          setError("No image found for this artwork. Try again.");
+        }
         setLoading(false);
-        const today = new Date().toISOString().slice(0, 10);
-        localStorage.setItem("dailyArt", JSON.stringify({ date: today, art: artData }));
       })
       .catch(() => {
         setError("Failed to load new artwork. Please try again.");
@@ -71,27 +80,4 @@ export default function App() {
       <VisitorInfoModal open={showVisitorInfo} onClose={() => setShowVisitorInfo(false)} />
       {loading && <Loader />}
       {error && <ErrorMessage message={error} onRetry={handleRefresh} />}
-      {!loading && art && !showFavorites && (
-        <ArtDisplay
-          art={art}
-          isFavorite={favorites.some((fav) => fav.objectID === art.objectID)}
-          onFavorite={handleFavorite}
-        />
-      )}
-      {!loading && showFavorites && (
-        <FavoritesList
-          favorites={favorites}
-          onSelect={(artwork) => {
-            setArt(artwork);
-            setShowFavorites(false);
-          }}
-          onRemove={(objectID) => {
-            const updated = removeFavorite(objectID);
-            setFavorites(updated);
-          }}
-        />
-      )}
-
-    </div>
-  );
-}
+      {!loading &&
