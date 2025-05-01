@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Helper: get unique, sorted, non-empty values
 function getUnique(arr) {
@@ -8,6 +9,7 @@ function getUnique(arr) {
 }
 
 function Preferences({ preferences, setPreferences }) {
+  const navigate = useNavigate();
   // Always initialize with arrays
   const [localPrefs, setLocalPrefs] = useState({
     styles: preferences.styles || [],
@@ -93,6 +95,7 @@ function Preferences({ preferences, setPreferences }) {
   const handleSave = () => {
     setPreferences(localPrefs);
     localStorage.setItem("artPreferences", JSON.stringify(localPrefs));
+    navigate('/');
   };
 
   return (
