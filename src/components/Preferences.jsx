@@ -1,54 +1,66 @@
-// Fetching a new random artwork from The Met API
-export async function fetchArtById() {
-  const idsRes = await fetch(
-    "https://collectionapi.metmuseum.org/public/collection/v1/objects"
+import React, { useState, useEffect } from "react";
+
+// Defining available styles and periods (customize as needed)
+const STYLES = ["Impressionism", "Modern", "Renaissance", "Baroque", "Egyptian", "Abstract"];
+const PERIODS = ["19th Century", "20th Century", "21st Century", "Ancient", "Medieval"];
+
+function Preferences({ preferences, setPreferences }) {
+  const [localPrefs, setLocalPrefs] = useState(preferences);
+
+  useEffect(() => {
+    setLocalPrefs(preferences);
+  }, [preferences]);
+
+  // Handling checkbox change for styles or periods
+  const handleChange = (type, value) => {
+    setLocalPrefs((prefs) => ({
+      ...prefs,
+      [type]: prefs[type].includes(value)
+        ? prefs[type].filter((v) => v !== value)
+        : [...prefs[type], value],
+    }));
+  };
+
+  // Saving preferences to parent and localStorage
+  const handleSave = () => {
+    setPreferences(localPrefs);
+    localStorage.setItem("artPreferences", JSON.stringify(localPrefs));
+  };
+
+  return (
+    <div className="preferences-panel" style={{ margin: "2rem 0" }}>
+      <h3>Choose Art Preferences</h3>
+      <div>
+        <strong>Styles:</strong>
+        {STYLES.map((style) => (
+          <label key={style} style={{ marginRight: "1rem" }}>
+            <input
+              type="checkbox"
+              checked={localPrefs.styles.includes(style)}
+              onChange={() => handleChange("styles", style)}
+            />
+            {style}
+          </label>
+        ))}
+      </div>
+      <div style={{ marginTop: "1rem" }}>
+        <strong>Periods:</strong>
+        {PERIODS.map((period) => (
+          <label key={period} style={{ marginRight: "1rem" }}>
+            <input
+              type="checkbox"
+              checked={localPrefs.periods.includes(period)}
+              onChange={() => handleChange("periods", period)}
+            />
+            {period}
+          </label>
+        ))}
+      </div>
+      <button style={{ marginTop: "1.5rem" }} onClick={handleSave}>
+        Save Preferences
+      </button>
+    </div>
   );
-  const idsData = await idsRes.json();
-  if (!idsData.objectIDs?.length) throw new Error("No artworks found.");
-  const randomIndex = Math.floor(Math.random() * idsData.objectIDs.length);
-  const randomId = idsData.objectIDs[randomIndex];
-  const artRes = await fetch(
-    `https://collectionapi.metmuseum.org/public/collection/v1/objects/${randomId}`
-  );
-  return await artRes.json();
 }
 
-// Getting today's artwork from localStorage or fetching a new one
-export async function getDailyArt() {
-  const today = new Date().toISOString().slice(0, 10);
-  const cached = localStorage.getItem("dailyArt");
-  if (cached) {
-    const { date, art } = JSON.parse(cached);
-    if (date === today) {
-      return art;
-    }
-  }
-  const art = await fetchArtById();
-  localStorage.setItem("dailyArt", JSON.stringify({ date: today, art }));
-  return art;
-}
-
-// Managing favorites
-export function getFavorites() {
-  const favs = localStorage.getItem("favorites");
-  return favs ? JSON.parse(favs) : [];
-}
-
-// Saving a favorite artwork
-export function saveFavorite(art) {
-  const favs = getFavorites();
-  if (!favs.some((fav) => fav.objectID === art.objectID)) {
-    const updated = [...favs, art];
-    localStorage.setItem("favorites", JSON.stringify(updated));
-    return updated;
-  }
-  return favs;
-}
-
-// Removing a favorite artwork by objectID
-export function removeFavorite(objectID) {
-  const favs = getFavorites();
-  const updated = favs.filter((fav) => fav.objectID !== objectID);
-  localStorage.setItem("favorites", JSON.stringify(updated));
-  return updated;
-}
+export default Preferences;
