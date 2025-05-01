@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Loader from "./components/Loader";
 import ErrorMessage from "./components/ErrorMessage";
 import FavoritesList from "./components/FavoritesList";
@@ -18,6 +19,7 @@ import {
 const DEFAULT_PREFERENCES = { styles: [], periods: [] };
 
 export default function App() {
+  const navigate = useNavigate();
   const [art, setArt] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -48,6 +50,7 @@ export default function App() {
           setError("No image found for today's artwork. Try refreshing.");
         }
         setLoading(false);
+        navigate('/');
       })
       .catch(() => {
         setError("Failed to load artwork. Please try again.");
