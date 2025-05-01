@@ -1,5 +1,5 @@
 // Fetching a new random artwork from The Met API
-export async function fetchArtById(preferences) {
+export async function fetchArtById() {
   const idsRes = await fetch(
     "https://collectionapi.metmuseum.org/public/collection/v1/objects"
   );
@@ -14,7 +14,6 @@ export async function fetchArtById(preferences) {
       `https://collectionapi.metmuseum.org/public/collection/v1/objects/${randomId}`
     );
     const art = await artRes.json();
-    
     // Returning art only if it has a primary or additional image
     if (art.primaryImage || (art.additionalImages && art.additionalImages.length > 0)) {
       return art;
@@ -29,10 +28,15 @@ export async function getDailyArt() {
   const cached = localStorage.getItem("dailyArt");
   if (cached) {
     const { date, art } = JSON.parse(cached);
-    if (date === today && (art.primaryImage || art.additionalImages?.length)) {
+    // Returning cached art if it is from today and has an image
+    if (
+      date === today &&
+      (art.primaryImage || (art.additionalImages && art.additionalImages.length > 0))
+    ) {
       return art;
     }
   }
+  // Fetching new art and saving it to localStorage
   const art = await fetchArtById();
   localStorage.setItem("dailyArt", JSON.stringify({ date: today, art }));
   return art;
@@ -63,41 +67,42 @@ export function removeFavorite(objectID) {
   return updated;
 }
 
-// Recommendation system
+// Improved recommendations with preference weighting
 export function getRecommendedArtworks(allArtworks, favorites, preferences) {
   if (allArtworks.length === 0) return [];
-  
-  const nonFavoriteArtworks = allArtworks.filter(art => 
+  // Exclude favorited artworks
+  const nonFavoriteArtworks = allArtworks.filter(art =>
     !favorites.some(fav => fav.objectID === art.objectID)
   );
 
+  // Create scoring system
   return nonFavoriteArtworks.map(art => {
     let score = 0;
-    
+    // Style matching (40% weight)
     if (preferences.styles?.length > 0 && art.style) {
       const artStyles = art.style.toLowerCase().split('|');
-      score += preferences.styles.filter(prefStyle => 
+      score += preferences.styles.filter(prefStyle =>
         artStyles.some(artStyle => artStyle.includes(prefStyle.toLowerCase()))
       ).length * 40;
     }
-
-    if (art.medium) {
+    // Medium matching (30% weight)
+    if (preferences.mediums?.length > 0 && art.medium) {
       const artMediums = art.medium.toLowerCase().split(/,|;| and /);
-      score += preferences.periods?.filter(prefMedium => 
+      score += preferences.mediums.filter(prefMedium =>
         artMediums.some(artMedium => artMedium.includes(prefMedium.toLowerCase()))
       ).length * 30;
     }
-
+    // Period matching (20% weight)
     if (preferences.periods?.length > 0 && art.objectDate) {
-      score += preferences.periods.filter(prefPeriod => 
+      score += preferences.periods.filter(prefPeriod =>
         art.objectDate.toLowerCase().includes(prefPeriod.toLowerCase())
       ).length * 20;
     }
-
+    // Random boost to ensure diversity (10% weight)
     score += Math.random() * 10;
     return { art, score };
   })
   .sort((a, b) => b.score - a.score)
-  .slice(0, 12)
+  .slice(0, 12) // Top 12 recommendations
   .map(item => item.art);
 }
