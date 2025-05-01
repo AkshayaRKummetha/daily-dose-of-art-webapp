@@ -56,6 +56,10 @@ export default function App() {
   }, []);
 
   const handleRefresh = () => {
+    // Always close recommendations and favorites when refreshing
+    setShowFavorites(false);
+    setShowRecommendations(false);
+
     setLoading(true);
     setError("");
     fetchArtById()
@@ -98,13 +102,13 @@ export default function App() {
       <h1>Daily Dose of Art</h1>
       <div className="controls" style={{ marginBottom: "2rem" }}>
         <button onClick={handleRefresh}>New Artwork</button>
-        <button onClick={() => setShowFavorites(prev => !prev)}>
+        <button onClick={() => setShowFavorites((prev) => !prev)}>
           {showFavorites ? "Hide Favorites" : "Show Favorites"}
         </button>
-        <button onClick={() => setShowRecommendations(prev => !prev)}>
+        <button onClick={() => setShowRecommendations((prev) => !prev)}>
           {showRecommendations ? "Hide Recommendations" : "Show Recommendations"}
         </button>
-        <button onClick={() => setShowPreferences(prev => !prev)}>
+        <button onClick={() => setShowPreferences((prev) => !prev)}>
           {showPreferences ? "Hide Preferences" : "Set Preferences"}
         </button>
       </div>
@@ -140,7 +144,6 @@ export default function App() {
       {showFavorites && (
         <FavoritesList
           favorites={favorites}
-          onSelect={(artwork) => setArt(artwork)}
           onRemove={(objectID) => setFavorites(removeFavorite(objectID))}
         />
       )}
