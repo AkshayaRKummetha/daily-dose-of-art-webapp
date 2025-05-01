@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-// Importing zoom & pan components
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 function ArtDisplay({ art, isFavorite, onFavorite }) {
@@ -41,7 +40,7 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
             wheel={{ step: 0.2 }}
           >
             {({ zoomIn, zoomOut, resetTransform }) => (
-              <React.Fragment>
+              <>
                 <TransformComponent>
                   <img
                     src={images[imgIndex]}
@@ -55,7 +54,7 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
                   <button onClick={zoomOut} aria-label="Zoom out">Zoom Out</button>
                   <button onClick={resetTransform} aria-label="Reset zoom">Reset</button>
                 </div>
-              </React.Fragment>
+              </>
             )}
           </TransformWrapper>
           {/* Rendering carousel controls if more than one image */}
