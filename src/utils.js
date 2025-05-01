@@ -67,44 +67,48 @@ export function removeFavorite(objectID) {
   return updated;
 }
 
-// Getting recommended artworks based on favorites and preferences
+// Replace getRecommendedArtworks with this improved version
 export function getRecommendedArtworks(allArtworks, favorites, preferences) {
-  // Returning empty array if no favorites and no preferences
-  if (
-    (!favorites || favorites.length === 0) &&
-    (!preferences ||
-      ((!preferences.styles || preferences.styles.length === 0) &&
-        (!preferences.periods || preferences.periods.length === 0)))
-  ) {
-    return [];
-  }
-
-  // Filtering artworks by matching style, period, or artist
-  return allArtworks.filter((art) =>
-    (
-      (preferences.styles &&
-        preferences.styles.length > 0 &&
-        preferences.styles.some((style) =>
-          (art.style || "")
-            .toLowerCase()
-            .includes(style.toLowerCase())
-        )) ||
-      (preferences.periods &&
-        preferences.periods.length > 0 &&
-        preferences.periods.some((period) =>
-          (art.objectDate || "")
-            .toLowerCase()
-            .includes(period.toLowerCase())
-        )) ||
-      (favorites &&
-        favorites.length > 0 &&
-        favorites.some(
-          (fav) =>
-            fav.artistDisplayName &&
-            art.artistDisplayName &&
-            fav.artistDisplayName === art.artistDisplayName
-        ))
-    )
+  if (allArtworks.length === 0) return [];
+  
+  // Exclude favorited artworks
+  const nonFavoriteArtworks = allArtworks.filter(art => 
+    !favorites.some(fav => fav.objectID === art.objectID)
   );
-}
 
+  // Create scoring system
+  return nonFavoriteArtworks.map(art => {
+    let score = 0;
+    
+    // Style matching (40% weight)
+    if (preferences.styles?.length > 0 && art.style) {
+      const artStyles = art.style.toLowerCase().split('|');
+      score += preferences.styles.filter(prefStyle => 
+        artStyles.some(artStyle => artStyle.includes(prefStyle.toLowerCase()))
+      ).length * 40;
+    }
+
+    // Medium matching (30% weight)
+    if (art.medium) {
+      const artMediums = art.medium.toLowerCase().split(/,|;| and /);
+      score += preferences.periods?.filter(prefMedium => 
+        artMediums.some(artMedium => artMedium.includes(prefMedium.toLowerCase()))
+      ).length * 30;
+    }
+
+    // Date/period matching (20% weight)
+    if (preferences.periods?.length > 0 && art.objectDate) {
+      score += preferences.periods.filter(prefPeriod => 
+        art.objectDate.toLowerCase().includes(prefPeriod.toLowerCase())
+      ).length * 20;
+    }
+
+    // Random boost to ensure diversity (10% weight)
+    score += Math.random() * 10;
+
+    return { art, score };
+  })
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 12) // Top 12 recommendations
+  .map(item => item.art);
+}
