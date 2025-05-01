@@ -6,13 +6,19 @@ export async function fetchArtById() {
   const idsData = await idsRes.json();
   if (!idsData.objectIDs?.length) throw new Error("No artworks found.");
 
-  const randomIndex = Math.floor(Math.random() * idsData.objectIDs.length);
-  const randomId = idsData.objectIDs[randomIndex];
-
-  const artRes = await fetch(
-    `https://collectionapi.metmuseum.org/public/collection/v1/objects/${randomId}`
-  );
-  return await artRes.json();
+  // Try up to 10 times to get an artwork with an image
+  for (let i = 0; i < 10; i++) {
+    const randomIndex = Math.floor(Math.random() * idsData.objectIDs.length);
+    const randomId = idsData.objectIDs[randomIndex];
+    const artRes = await fetch(
+      `https://collectionapi.metmuseum.org/public/collection/v1/objects/${randomId}`
+    );
+    const art = await artRes.json();
+    if (art.primaryImage || (art.additionalImages && art.additionalImages.length > 0)) {
+      return art;
+    }
+  }
+  throw new Error("Could not find artwork with images after several tries.");
 }
 
 // Getting today's artwork from localStorage or fetching a new one
@@ -21,7 +27,10 @@ export async function getDailyArt() {
   const cached = localStorage.getItem("dailyArt");
   if (cached) {
     const { date, art } = JSON.parse(cached);
-    if (date === today) {
+    if (
+      date === today &&
+      (art.primaryImage || (art.additionalImages && art.additionalImages.length > 0))
+    ) {
       return art;
     }
   }
