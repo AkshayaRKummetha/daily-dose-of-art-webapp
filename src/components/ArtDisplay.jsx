@@ -2,6 +2,65 @@ import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
+// SVGs for arrows
+const ArrowLeft = ({ ...props }) => (
+  <button
+    aria-label="Previous image"
+    {...props}
+    style={{
+      ...props.style,
+      background: "rgba(0,0,0,0.35)",
+      border: "none",
+      borderRadius: "50%",
+      width: 38,
+      height: 38,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      position: "absolute",
+      top: "50%",
+      left: 10,
+      transform: "translateY(-50%)",
+      cursor: "pointer",
+      zIndex: 2,
+      color: "#fff",
+      fontSize: "1.8rem",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.16)",
+    }}
+  >
+    <span aria-hidden="true" style={{ fontSize: "1.5em" }}>‹</span>
+  </button>
+);
+
+const ArrowRight = ({ ...props }) => (
+  <button
+    aria-label="Next image"
+    {...props}
+    style={{
+      ...props.style,
+      background: "rgba(0,0,0,0.35)",
+      border: "none",
+      borderRadius: "50%",
+      width: 38,
+      height: 38,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      position: "absolute",
+      top: "50%",
+      right: 10,
+      transform: "translateY(-50%)",
+      cursor: "pointer",
+      zIndex: 2,
+      color: "#fff",
+      fontSize: "1.8rem",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.16)",
+    }}
+  >
+    <span aria-hidden="true" style={{ fontSize: "1.5em" }}>›</span>
+  </button>
+);
+
 function ArtDisplay({ art, isFavorite, onFavorite }) {
   if (!art) return null;
 
@@ -21,9 +80,23 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
     }
   }, [imgIndex, art.objectID]);
 
-  // Carousel controls
+  // Keyboard navigation for carousel
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (images.length < 2) return;
+      if (e.key === "ArrowLeft") {
+        setImgIndex((i) => (i > 0 ? i - 1 : images.length - 1));
+      } else if (e.key === "ArrowRight") {
+        setImgIndex((i) => (i < images.length - 1 ? i + 1 : 0));
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [images.length]);
+
   const handlePrev = () => setImgIndex((i) => (i > 0 ? i - 1 : images.length - 1));
   const handleNext = () => setImgIndex((i) => (i < images.length - 1 ? i + 1 : 0));
+  const handleDot = (idx) => setImgIndex(idx);
 
   // Resetting zoom and centering image
   const handleReset = () => {
@@ -48,7 +121,16 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
         <strong>Medium:</strong> {art.medium || "Unknown"}
       </p>
       {images.length > 0 ? (
-        <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            position: "relative",
+            maxWidth: "700px",
+          }}
+        >
           <TransformWrapper
             ref={transformRef}
             centerOnInit
@@ -59,57 +141,90 @@ function ArtDisplay({ art, isFavorite, onFavorite }) {
             wheel={{ step: 0.2 }}
           >
             {() => (
-              <>
-                <div style={{
+              <div
+                style={{
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  width: "100%"
-                }}>
-                  <TransformComponent
-                    wrapperStyle={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      width: "100%",
+                  width: "100%",
+                  position: "relative",
+                }}
+              >
+                {images.length > 1 && (
+                  <ArrowLeft onClick={handlePrev} tabIndex={0} />
+                )}
+                <TransformComponent
+                  wrapperStyle={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                  contentStyle={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <img
+                    src={images[imgIndex]}
+                    alt={art.title}
+                    style={{
+                      maxWidth: "80vw",
+                      maxHeight: "60vh",
+                      borderRadius: "8px",
+                      marginTop: "1rem",
+                      display: "block",
+                      marginLeft: "auto",
+                      marginRight: "auto",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
                     }}
-                    contentStyle={{
+                  />
+                </TransformComponent>
+                {images.length > 1 && (
+                  <ArrowRight onClick={handleNext} tabIndex={0} />
+                )}
+                {/* Dots */}
+                {images.length > 1 && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: "50%",
+                      bottom: "10px",
+                      transform: "translateX(-50%)",
                       display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      width: "100%",
+                      gap: "0.5rem",
+                      zIndex: 3,
                     }}
                   >
-                    <img
-                      src={images[imgIndex]}
-                      alt={art.title}
-                      style={{
-                        maxWidth: "80vw",
-                        maxHeight: "60vh",
-                        borderRadius: "8px",
-                        marginTop: "1rem",
-                        display: "block",
-                        marginLeft: "auto",
-                        marginRight: "auto"
-                      }}
-                    />
-                  </TransformComponent>
-                </div>
-                <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem", justifyContent: "center" }}>
-                  <button onClick={handleReset} aria-label="Reset zoom and center">Reset</button>
-                </div>
-              </>
+                    {images.map((_, idx) => (
+                      <button
+                        key={idx}
+                        aria-label={`Show image ${idx + 1}`}
+                        onClick={() => handleDot(idx)}
+                        style={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: "50%",
+                          border: "none",
+                          background: idx === imgIndex ? "#0055a5" : "#ccc",
+                          opacity: idx === imgIndex ? 1 : 0.5,
+                          cursor: "pointer",
+                          boxShadow: idx === imgIndex ? "0 0 0 2px #fff" : "none",
+                          transition: "background 0.2s, opacity 0.2s",
+                        }}
+                        tabIndex={0}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </TransformWrapper>
-          {images.length > 1 && (
-            <div className="carousel-controls" style={{ marginTop: "0.5rem" }}>
-              <button onClick={handlePrev} aria-label="Previous image">Prev</button>
-              <span style={{ margin: "0 1rem" }}>
-                {imgIndex + 1} / {images.length}
-              </span>
-              <button onClick={handleNext} aria-label="Next image">Next</button>
-            </div>
-          )}
+          <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem", justifyContent: "center" }}>
+            <button onClick={handleReset} aria-label="Reset zoom and center">Reset</button>
+          </div>
         </div>
       ) : (
         <p>No image available.</p>
