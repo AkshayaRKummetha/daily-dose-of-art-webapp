@@ -22,7 +22,7 @@ body {
   text-align: center;
 }
 
-/* Main Title - Using Didot (MET-style serif) */
+/* Main Title - MET-style serif */
 h1 {
   font-family: 'GFS Didot', 'Bodoni MT', Georgia, serif;
   font-weight: 700;
@@ -154,8 +154,8 @@ a.button:focus,
 .met-link-btn:focus {
   background-color: var(--met-red-dark);
   color: #fff !important;
-  outline: none;
   text-decoration: none;
+  outline: none;
 }
 
 /* Favorite button specific */
@@ -169,7 +169,19 @@ a.button:focus,
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 1.1rem; /* Even spacing between all but last */
   margin-top: 1.5rem;
+}
+
+.button-group > * {
+  width: 220px;
+  max-width: 90vw;
+  margin: 0 auto;
+}
+
+.button-group > *:last-child {
+  margin-top: 1.7rem; /* Extra space above last button */
+  margin-bottom: 0;
 }
 
 /* Main art container */
@@ -187,4 +199,9 @@ a.button:focus,
   display: flex;
   justify-content: center;
   gap: 1rem;
+}
+
+/* Remove legacy list styles */
+.favorites-list, .favorites-list li {
+  all: unset;
 }
