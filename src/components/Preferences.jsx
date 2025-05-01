@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
-// Helper: get unique, sorted, non-empty values
+// Helper to get unique, sorted, non-empty values
 function getUnique(arr) {
   return Array.from(new Set(arr.filter(Boolean).map(s => s.trim())))
     .filter(Boolean)
@@ -9,8 +8,6 @@ function getUnique(arr) {
 }
 
 function Preferences({ preferences, setPreferences }) {
-  const navigate = useNavigate();
-  // Always initialize with arrays
   const [localPrefs, setLocalPrefs] = useState({
     styles: preferences.styles || [],
     mediums: preferences.mediums || [],
@@ -62,7 +59,7 @@ function Preferences({ preferences, setPreferences }) {
         details.forEach(obj => {
           if (obj.style) styles.push(...obj.style.split("|"));
           if (obj.classification) styles.push(obj.classification);
-          if (obj.medium) mediums.push(...obj.medium.split(/,\s*|;\s*|\band\b/));
+          if (obj.medium) mediums.push(...obj.medium.split(/,|;| and /));
           if (obj.objectDate) periods.push(obj.objectDate);
           if (obj.period) periods.push(obj.period);
         });
@@ -95,7 +92,6 @@ function Preferences({ preferences, setPreferences }) {
   const handleSave = () => {
     setPreferences(localPrefs);
     localStorage.setItem("artPreferences", JSON.stringify(localPrefs));
-    navigate('/');
   };
 
   return (
