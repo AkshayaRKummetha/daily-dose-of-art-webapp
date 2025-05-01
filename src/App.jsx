@@ -16,7 +16,7 @@ import {
   getRecommendedArtworks
 } from "./utils";
 
-const DEFAULT_PREFERENCES = { styles: [], periods: [] };
+const DEFAULT_PREFERENCES = { styles: [], periods: [], mediums: [] };
 
 export default function App() {
   const navigate = useNavigate();
@@ -33,12 +33,13 @@ export default function App() {
   );
   const [allArtworks, setAllArtworks] = useState([]);
 
+  // Load artwork on mount or when preferences change
   useEffect(() => {
     setLoading(true);
     setError("");
-    getDailyArt()
+    getDailyArt(preferences)
       .then((artData) => {
-        if (artData.primaryImage || (artData.additionalImages && artData.additionalImages.length > 0)) {
+        if (artData?.primaryImage || (artData?.additionalImages && artData.additionalImages.length > 0)) {
           setArt(artData);
           setAllArtworks((prev) => {
             if (artData && !prev.some(a => a.objectID === artData.objectID)) {
@@ -56,38 +57,39 @@ export default function App() {
         setError("Failed to load artwork. Please try again.");
         setLoading(false);
       });
-  }, []);
+    // eslint-disable-next-line
+  }, [preferences]);
 
-  const handleRefresh = () => {
-    // Always close recommendations and favorites when refreshing
+  // Handles fetching new artwork and resets views
+  const handleRefresh = async () => {
     setShowFavorites(false);
     setShowRecommendations(false);
-
+    setShowPreferences(false);
     setLoading(true);
     setError("");
-    fetchArtById()
-      .then((artData) => {
-        if (artData.primaryImage || (artData.additionalImages && artData.additionalImages.length > 0)) {
-          setArt(artData);
-          setAllArtworks((prev) => {
-            if (artData && !prev.some(a => a.objectID === artData.objectID)) {
-              return [...prev, artData];
-            }
-            return prev;
-          });
-          const today = new Date().toISOString().slice(0, 10);
-          localStorage.setItem("dailyArt", JSON.stringify({ date: today, art: artData }));
-        } else {
-          setError("No image found for this artwork. Try again.");
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Failed to load new artwork. Please try again.");
-        setLoading(false);
-      });
+    try {
+      const artData = await fetchArtById(preferences);
+      if (artData?.primaryImage || (artData?.additionalImages && artData.additionalImages.length > 0)) {
+        setArt(artData);
+        setAllArtworks((prev) => {
+          if (artData && !prev.some(a => a.objectID === artData.objectID)) {
+            return [...prev, artData];
+          }
+          return prev;
+        });
+        const today = new Date().toISOString().slice(0, 10);
+        localStorage.setItem("dailyArt", JSON.stringify({ date: today, art: artData }));
+      } else {
+        setError("No image found for this artwork. Try again.");
+      }
+    } catch {
+      setError("Failed to load new artwork. Please try again.");
+    }
+    setLoading(false);
+    navigate('/');
   };
 
+  // Handles saving/removing favorites
   const handleFavorite = (artwork) => {
     if (favorites.some((fav) => fav.objectID === artwork.objectID)) {
       const updated = removeFavorite(artwork.objectID);
@@ -96,6 +98,16 @@ export default function App() {
       const updated = saveFavorite(artwork);
       setFavorites(updated);
     }
+  };
+
+  // Handles saving preferences and returning to main view
+  const handleSavePreferences = (updatedPrefs) => {
+    setPreferences(updatedPrefs);
+    localStorage.setItem("artPreferences", JSON.stringify(updatedPrefs));
+    setShowPreferences(false);
+    setShowFavorites(false);
+    setShowRecommendations(false);
+    handleRefresh(); // Show new artwork with new preferences
   };
 
   const recommended = getRecommendedArtworks(allArtworks, favorites, preferences);
@@ -120,7 +132,10 @@ export default function App() {
       {error && <ErrorMessage message={error} />}
 
       {showPreferences && (
-        <Preferences preferences={preferences} setPreferences={setPreferences} />
+        <Preferences
+          preferences={preferences}
+          setPreferences={handleSavePreferences}
+        />
       )}
 
       {!loading && art && !showFavorites && !showRecommendations && !showPreferences && (
@@ -129,10 +144,8 @@ export default function App() {
             art={art}
             onFavorite={handleFavorite}
             isFavorite={favorites.some((fav) => fav.objectID === art.objectID)}
+            handleRefresh={handleRefresh}
           />
-          <div className="action-buttons">
-            <button onClick={handleRefresh}>Show Me Another Artwork</button>
-          </div>
         </div>
       )}
 
